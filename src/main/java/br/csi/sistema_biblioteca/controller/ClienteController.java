@@ -79,9 +79,7 @@ public class ClienteController {
             @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos")
     })
     @PostMapping
-    public ResponseEntity<Cliente> salvar(@RequestBody @Valid Cliente cliente,
-                                          UriComponentsBuilder uriBuilder) {
-        // Validação de CPF único
+    public ResponseEntity<Cliente> salvar(@RequestBody @Valid Cliente cliente, UriComponentsBuilder uriBuilder) {
         if (clienteRepository.findByCpf(cliente.getCpf()).isPresent()) {
             throw new RuntimeException("CPF já cadastrado");
         }
@@ -110,7 +108,6 @@ public class ClienteController {
             }
         });
 
-        // Atualizar campos
         clienteExistente.setNome(cliente.getNome());
         clienteExistente.setCpf(cliente.getCpf());
         clienteExistente.setTelefone(cliente.getTelefone());
@@ -138,7 +135,6 @@ public class ClienteController {
             }
         });
 
-        // Atualizar campos
         clienteExistente.setNome(cliente.getNome());
         clienteExistente.setCpf(cliente.getCpf());
         clienteExistente.setTelefone(cliente.getTelefone());

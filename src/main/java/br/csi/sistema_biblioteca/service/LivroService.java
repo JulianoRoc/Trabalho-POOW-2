@@ -40,13 +40,11 @@ public class LivroService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Livro não encontrado"));
     }
 
-    // CORRIGIDO: Mudado de String para UUID
     public Livro buscarPorUuid(UUID uuid) {
         return this.livroRepository.findByUuid(uuid)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Livro não encontrado"));
     }
 
-    // CORRIGIDO: Mudado de String para UUID
     public Livro buscarPorUuidDisponivel(UUID uuid) {
         return this.livroRepository.findByUuidAndDisponivelTrue(uuid)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Livro não encontrado ou indisponível"));
@@ -63,7 +61,6 @@ public class LivroService {
         this.livroRepository.delete(livro);
     }
 
-    // CORRIGIDO: Mudado de String para UUID
     public void excluirPorUuid(UUID uuid) {
         Livro livro = buscarPorUuid(uuid);
 
@@ -87,7 +84,6 @@ public class LivroService {
         return this.livroRepository.save(l);
     }
 
-    // CORRIGIDO: Mudado de String para UUID
     public Livro atualizarPorUuid(UUID uuid, Livro livro) {
         Livro l = this.livroRepository.findByUuid(uuid)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Livro não encontrado"));
@@ -124,7 +120,6 @@ public class LivroService {
         return this.livroRepository.save(livro);
     }
 
-    // CORRIGIDO: Mudado de String para UUID
     public Livro adicionarCategoriaPorUuid(UUID uuidLivro, Long categoriaId) {
         Livro livro = buscarPorUuid(uuidLivro);
         Categoria categoria = categoriaService.buscarPorId(categoriaId);
@@ -141,7 +136,6 @@ public class LivroService {
         return this.livroRepository.save(livro);
     }
 
-    // CORRIGIDO: Mudado de String para UUID
     public Livro removerCategoriaPorUuid(UUID uuidLivro, Long categoriaId) {
         Livro livro = buscarPorUuid(uuidLivro);
         Categoria categoria = categoriaService.buscarPorId(categoriaId);
@@ -155,7 +149,6 @@ public class LivroService {
         return new ArrayList<>(categoria.getLivros());
     }
 
-    // CORRIGIDO: Mudado de String para UUID
     public boolean existePorUuid(UUID uuid) {
         return this.livroRepository.existsByUuid(uuid);
     }

@@ -18,7 +18,6 @@ public class ClienteService {
     private final ClienteRepository clienteRepository;
 
     public void salvar(Cliente cliente) {
-        // Verificar se CPF já existe
         Optional<Cliente> clienteExistente = clienteRepository.findByCpf(cliente.getCpf());
         if (clienteExistente.isPresent()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CPF já cadastrado");
@@ -62,12 +61,6 @@ public class ClienteService {
         this.clienteRepository.delete(cliente);
     }
 
-    /*
-        Para atualizar uma entidade do banco é necessário pegar a referência desta
-        entidade e atualizar com os dados que vieram por parametro.
-        O save(...) detecta que esse RECURSO já existe no banco de dados pela busca por id
-        assim ao executar o save com id ele faz um UPDATE
-    */
     public void atualizar(Long id, Cliente cliente) {
         Cliente c = this.clienteRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado"));

@@ -19,7 +19,6 @@ public interface EmprestimoRepository extends JpaRepository<Emprestimo, Long> {
     @Query("SELECT COUNT(e) FROM Emprestimo e WHERE e.cliente.id = :clienteId AND e.dataDevolucao IS NULL")
     int countEmprestimosAtivosPorCliente(@Param("clienteId") Long clienteId);
 
-    // Consultas adicionais úteis
     List<Emprestimo> findByFuncionarioId(Long funcionarioId);
 
     @Query("SELECT e FROM Emprestimo e WHERE e.dataDevolucao IS NULL AND e.dataDevolucaoPrevista < CURRENT_DATE")

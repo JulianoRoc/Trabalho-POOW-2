@@ -19,7 +19,6 @@ public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
 
     Optional<Categoria> findByNomeIgnoreCase(String nome);
 
-    // MÉTODOS UUID - CORRIGIDOS
     Optional<Categoria> findByUuid(UUID uuid);
 
     @Query("SELECT COUNT(l) > 0 FROM Categoria c JOIN c.livros l WHERE c.uuid = :categoriaUuid")

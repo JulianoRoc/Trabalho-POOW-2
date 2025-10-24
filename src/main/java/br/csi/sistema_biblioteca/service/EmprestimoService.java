@@ -52,10 +52,8 @@ public class EmprestimoService {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Livro já está emprestado");
                 });
 
-        // Criar empréstimo
         Emprestimo emprestimo = new Emprestimo(cliente, livro, funcionario);
 
-        // Marcar livro como indisponível
         livro.setDisponivel(false);
         livroRepository.save(livro);
 
@@ -71,15 +69,12 @@ public class EmprestimoService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Empréstimo já foi devolvido");
         }
 
-        // Verificar se funcionário está ativo
         Funcionario funcionario = funcionarioRepository.findByIdAndAtivoTrue(funcionarioId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Funcionário não está ativo"));
 
-        // Registrar devolução
         emprestimo.setDataDevolucao(LocalDateTime.now());
         emprestimo.setFuncionario(funcionario);
 
-        // Marcar livro como disponível
         Livro livro = emprestimo.getLivro();
         livro.setDisponivel(true);
         livroRepository.save(livro);
@@ -117,12 +112,6 @@ public class EmprestimoService {
         this.emprestimoRepository.delete(emprestimo);
     }
 
-    /*
-        Para atualizar uma entidade do banco é necessário pegar a referência desta
-        entidade e atualizar com os dados que vieram por parametro.
-        O save(...) detecta que esse RECURSO já existe no banco de dados pela busca por id
-        assim ao executar o save com id ele faz um UPDATE
-    */
     public Emprestimo atualizar(Long id, Emprestimo emprestimo) {
         Emprestimo e = this.emprestimoRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Empréstimo não encontrado"));

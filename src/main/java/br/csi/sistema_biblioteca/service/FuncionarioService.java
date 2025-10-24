@@ -117,16 +117,4 @@ public class FuncionarioService {
         funcionario.setAtivo(true);
         this.funcionarioRepository.save(funcionario);
     }
-
-    public Funcionario getFuncionarioUUID(String uuid) {
-        UUID uuidFormatado = UUID.fromString(uuid);
-        return this.funcionarioRepository.findByUuid(uuidFormatado)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Funcionário não encontrado"));
-    }
-
-    public void deletarUUID(String uuid) {
-        UUID uuidFormatado = UUID.fromString(uuid);
-        Funcionario funcionario = buscarPorUuid(uuidFormatado);
-        this.funcionarioRepository.delete(funcionario);
-    }
 }

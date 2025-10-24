@@ -18,7 +18,6 @@ public class CategoriaService {
     private final CategoriaRepository categoriaRepository;
 
     public Categoria salvar(Categoria categoria) {
-        // Validação de nome único
         if (categoriaRepository.findByNomeIgnoreCase(categoria.getNome()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Já existe uma categoria com este nome");
         }
@@ -34,7 +33,6 @@ public class CategoriaService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada"));
     }
 
-    // CORRIGIDO: Mudado de String para UUID
     public Categoria buscarPorUuid(UUID uuid) {
         return this.categoriaRepository.findByUuid(uuid)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada"));
@@ -51,7 +49,6 @@ public class CategoriaService {
         this.categoriaRepository.delete(categoria);
     }
 
-    // CORRIGIDO: Mudado de String para UUID
     public void excluirPorUuid(UUID uuid) {
         Categoria categoria = buscarPorUuid(uuid);
 
@@ -63,12 +60,6 @@ public class CategoriaService {
         this.categoriaRepository.delete(categoria);
     }
 
-    /*
-        Para atualizar uma entidade do banco é necessário pegar a referência desta
-        entidade e atualizar com os dados que vieram por parametro.
-        O save(...) detecta que esse RECURSO já existe no banco de dados pela busca por id
-        assim ao executar o save com id ele faz um UPDATE
-    */
     public Categoria atualizar(Long id, Categoria categoria) {
         Categoria c = this.categoriaRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada"));
@@ -86,12 +77,11 @@ public class CategoriaService {
         return this.categoriaRepository.save(c);
     }
 
-    // CORRIGIDO: Mudado de String para UUID
     public Categoria atualizarPorUuid(UUID uuid, Categoria categoria) {
         Categoria c = this.categoriaRepository.findByUuid(uuid)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada"));
 
-        // Verificar se o nome já existe em outra categoria (usando UUID para exclusão)
+        // Verificar se o nome já existe em outra categoria
         if (categoriaRepository.existsByNomeAndUuidNot(categoria.getNome(), uuid)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Já existe uma categoria com este nome");
         }
@@ -109,15 +99,5 @@ public class CategoriaService {
 
     public List<Categoria> buscarPorNomeParcial(String nome) {
         return this.categoriaRepository.findByNomeContainingIgnoreCase(nome);
-    }
-
-    // CORRIGIDO: Mudado de String para UUID
-    public boolean existePorUuid(UUID uuid) {
-        return this.categoriaRepository.existsByUuid(uuid);
-    }
-
-    // CORRIGIDO: Mudado de List<String> para List<UUID>
-    public List<Categoria> buscarPorUuids(List<UUID> uuids) {
-        return this.categoriaRepository.findByUuidIn(uuids);
     }
 }
