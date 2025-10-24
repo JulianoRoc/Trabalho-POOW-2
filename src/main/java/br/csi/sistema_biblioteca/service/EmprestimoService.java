@@ -1,7 +1,13 @@
 package br.csi.sistema_biblioteca.service;
 
-import br.csi.sistema_biblioteca.model.*;
-import br.csi.sistema_biblioteca.repository.*;
+import br.csi.sistema_biblioteca.model.cliente.Cliente;
+import br.csi.sistema_biblioteca.model.cliente.ClienteRepository;
+import br.csi.sistema_biblioteca.model.emprestimo.Emprestimo;
+import br.csi.sistema_biblioteca.model.emprestimo.EmprestimoRepository;
+import br.csi.sistema_biblioteca.model.funcionario.Funcionario;
+import br.csi.sistema_biblioteca.model.funcionario.FuncionarioRepository;
+import br.csi.sistema_biblioteca.model.livro_categoria.Livro;
+import br.csi.sistema_biblioteca.model.livro_categoria.LivroRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -47,18 +53,13 @@ public class EmprestimoService {
                 });
 
         // Criar empréstimo
-        Emprestimo emprestimo = new Emprestimo();
-        emprestimo.setCliente(cliente);
-        emprestimo.setLivro(livro);
-        emprestimo.setFuncionario(funcionario);
-        emprestimo.setDataEmprestimo(LocalDateTime.now());
-        emprestimo.setDataDevolucaoPrevista(LocalDateTime.now().plusDays(14)); // 2 semanas
+        Emprestimo emprestimo = new Emprestimo(cliente, livro, funcionario);
 
         // Marcar livro como indisponível
         livro.setDisponivel(false);
         livroRepository.save(livro);
 
-        return emprestimoRepository.save(emprestimo);
+        return this.emprestimoRepository.save(emprestimo);
     }
 
     @Transactional
@@ -83,14 +84,56 @@ public class EmprestimoService {
         livro.setDisponivel(true);
         livroRepository.save(livro);
 
-        return emprestimoRepository.save(emprestimo);
+        return this.emprestimoRepository.save(emprestimo);
+    }
+
+    public List<Emprestimo> listarTodos() {
+        return this.emprestimoRepository.findAll();
     }
 
     public List<Emprestimo> listarEmprestimosAtivos() {
-        return emprestimoRepository.findByDataDevolucaoIsNull();
+        return this.emprestimoRepository.findByDataDevolucaoIsNull();
+    }
+
+    public List<Emprestimo> listarEmprestimosAtrasados() {
+        return this.emprestimoRepository.findEmprestimosAtrasados();
     }
 
     public List<Emprestimo> listarHistoricoCliente(Long clienteId) {
-        return emprestimoRepository.findByClienteId(clienteId);
+        return this.emprestimoRepository.findByClienteId(clienteId);
+    }
+
+    public List<Emprestimo> listarPorFuncionario(Long funcionarioId) {
+        return this.emprestimoRepository.findByFuncionarioId(funcionarioId);
+    }
+
+    public Emprestimo buscarPorId(Long id) {
+        return this.emprestimoRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Empréstimo não encontrado"));
+    }
+
+    public void excluir(Long id) {
+        Emprestimo emprestimo = buscarPorId(id);
+        this.emprestimoRepository.delete(emprestimo);
+    }
+
+    /*
+        Para atualizar uma entidade do banco é necessário pegar a referência desta
+        entidade e atualizar com os dados que vieram por parametro.
+        O save(...) detecta que esse RECURSO já existe no banco de dados pela busca por id
+        assim ao executar o save com id ele faz um UPDATE
+    */
+    public Emprestimo atualizar(Long id, Emprestimo emprestimo) {
+        Emprestimo e = this.emprestimoRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Empréstimo não encontrado"));
+
+        e.setDataEmprestimo(emprestimo.getDataEmprestimo());
+        e.setDataDevolucao(emprestimo.getDataDevolucao());
+        e.setDataDevolucaoPrevista(emprestimo.getDataDevolucaoPrevista());
+        e.setCliente(emprestimo.getCliente());
+        e.setLivro(emprestimo.getLivro());
+        e.setFuncionario(emprestimo.getFuncionario());
+
+        return this.emprestimoRepository.save(e);
     }
 }
