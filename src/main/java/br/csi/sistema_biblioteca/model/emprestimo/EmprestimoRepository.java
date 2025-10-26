@@ -1,7 +1,5 @@
-package br.csi.sistema_biblioteca.repository;
+package br.csi.sistema_biblioteca.model.emprestimo;
 
-
-import br.csi.sistema_biblioteca.model.Emprestimo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,4 +18,9 @@ public interface EmprestimoRepository extends JpaRepository<Emprestimo, Long> {
 
     @Query("SELECT COUNT(e) FROM Emprestimo e WHERE e.cliente.id = :clienteId AND e.dataDevolucao IS NULL")
     int countEmprestimosAtivosPorCliente(@Param("clienteId") Long clienteId);
+
+    List<Emprestimo> findByFuncionarioId(Long funcionarioId);
+
+    @Query("SELECT e FROM Emprestimo e WHERE e.dataDevolucao IS NULL AND e.dataDevolucaoPrevista < CURRENT_DATE")
+    List<Emprestimo> findEmprestimosAtrasados();
 }
