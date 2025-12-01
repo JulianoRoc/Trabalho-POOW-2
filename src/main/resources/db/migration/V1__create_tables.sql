@@ -1,4 +1,3 @@
--- Tabela cliente
 CREATE TABLE cliente (
                          id_cliente BIGSERIAL NOT NULL PRIMARY KEY,
                          uuid UUID NOT NULL UNIQUE DEFAULT gen_random_uuid(),
@@ -10,7 +9,6 @@ CREATE TABLE cliente (
                          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabela funcionario
 CREATE TABLE funcionario (
                              id_funcionario BIGSERIAL NOT NULL PRIMARY KEY,
                              uuid UUID NOT NULL UNIQUE DEFAULT gen_random_uuid(),
@@ -22,7 +20,6 @@ CREATE TABLE funcionario (
                              updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabela categoria
 CREATE TABLE categoria (
                            id_categoria BIGSERIAL NOT NULL PRIMARY KEY,
                            uuid UUID NOT NULL UNIQUE DEFAULT gen_random_uuid(),
@@ -32,7 +29,6 @@ CREATE TABLE categoria (
                            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabela livro
 CREATE TABLE livro (
                        id_livro BIGSERIAL NOT NULL PRIMARY KEY,
                        uuid UUID NOT NULL UNIQUE DEFAULT gen_random_uuid(),
@@ -44,7 +40,6 @@ CREATE TABLE livro (
                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabela de junção livro_categoria (relacionamento many-to-many)
 CREATE TABLE livro_categoria (
                                  id_livro BIGINT NOT NULL,
                                  id_categoria BIGINT NOT NULL,
@@ -53,7 +48,6 @@ CREATE TABLE livro_categoria (
                                  FOREIGN KEY (id_categoria) REFERENCES categoria(id_categoria) ON DELETE CASCADE
 );
 
--- Tabela emprestimo
 CREATE TABLE emprestimo (
                             id_emprestimo BIGSERIAL NOT NULL PRIMARY KEY,
                             uuid UUID NOT NULL UNIQUE DEFAULT gen_random_uuid(),
@@ -70,7 +64,6 @@ CREATE TABLE emprestimo (
                             FOREIGN KEY (id_funcionario) REFERENCES funcionario(id_funcionario)
 );
 
--- Índices para melhor performance
 CREATE INDEX idx_cliente_cpf ON cliente(cpf);
 CREATE INDEX idx_cliente_uuid ON cliente(uuid);
 CREATE INDEX idx_funcionario_email ON funcionario(email);
@@ -89,16 +82,14 @@ CREATE INDEX idx_emprestimo_data_devolucao ON emprestimo(data_devolucao);
 CREATE INDEX idx_emprestimo_data_prevista ON emprestimo(data_devolucao_prevista);
 CREATE INDEX idx_emprestimo_uuid ON emprestimo(uuid);
 
--- Trigger function para updated_at
 CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
+    RETURNS TRIGGER AS $$
 BEGIN
     NEW.updated_at = CURRENT_TIMESTAMP;
-RETURN NEW;
+    RETURN NEW;
 END;
 $$ language 'plpgsql';
 
--- Triggers para todas as tabelas
 CREATE TRIGGER update_cliente_updated_at
     BEFORE UPDATE ON cliente
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -119,9 +110,9 @@ CREATE TRIGGER update_emprestimo_updated_at
     BEFORE UPDATE ON emprestimo
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Dados iniciais para teste
 INSERT INTO funcionario (nome, email, senha, ativo) VALUES
-    ('Administrador', 'admin@biblioteca.com', '$2a$10$ABCDE12345FGHIJ67890ABCDEFGHIJKLMNOPQRSTUVWXYZ123456', true);
+                                                        ('Administrador', 'admin@biblioteca.com', 'admin123', true),
+                                                        ('Juliano Rocha', 't@1', '1', true);
 
 INSERT INTO cliente (nome, cpf, telefone, endereco) VALUES
                                                         ('João Silva', '12345678901', '(11) 99999-9999', 'Rua A, 123 - Centro - São Paulo/SP'),
@@ -140,9 +131,4 @@ INSERT INTO livro (titulo, autor, ano_publicacao, disponivel) VALUES
                                                                   ('O Hobbit', 'J.R.R. Tolkien', 1937, true),
                                                                   ('It: A Coisa', 'Stephen King', 1986, true);
 
--- Associar livros com categorias
-INSERT INTO livro_categoria (id_livro, id_categoria) VALUES
-                                                         (1, 1), -- Dom Casmurro -> Romance
-                                                         (2, 2), -- 1984 -> Ficção Científica
-                                                         (3, 4), -- O Hobbit -> Fantasia
-                                                         (4, 3); -- It: A Coisa -> Terror
+INSERT INTO livro_categoria (id_livro, id_categoria) VALUES (1, 1), (2, 2), (3, 4), (4, 3);
