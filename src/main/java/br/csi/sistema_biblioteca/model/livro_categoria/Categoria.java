@@ -1,5 +1,6 @@
 package br.csi.sistema_biblioteca.model.livro_categoria;
 
+import com.fasterxml.jackson.annotation.JsonIgnore; // ← Adicione esta importação
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -44,6 +45,7 @@ public class Categoria {
     private String descricao;
 
     @ManyToMany(mappedBy = "categorias")
+    @JsonIgnore // ← ADICIONE ESTA LINHA PARA RESOLVER O PROBLEMA
     @Schema(description = "Conjunto de livros associados a esta categoria")
     private Set<Livro> livros = new HashSet<>();
 

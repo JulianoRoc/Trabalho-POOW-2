@@ -4,6 +4,7 @@ import br.csi.sistema_biblioteca.model.funcionario.Funcionario;
 import br.csi.sistema_biblioteca.model.funcionario.FuncionarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -16,12 +17,16 @@ import java.util.UUID;
 public class FuncionarioService {
 
     private final FuncionarioRepository funcionarioRepository;
+    private final PasswordEncoder passwordEncoder; // 🔐 Adicionado PasswordEncoder
 
     public Funcionario salvar(Funcionario funcionario) {
         Optional<Funcionario> funcionarioExistente = funcionarioRepository.findByEmail(funcionario.getEmail());
         if (funcionarioExistente.isPresent()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email já cadastrado");
         }
+
+        // 🔐 CODIFICAR SENHA ANTES DE SALVAR
+        funcionario.setSenha(passwordEncoder.encode(funcionario.getSenha()));
 
         return this.funcionarioRepository.save(funcionario);
     }
@@ -66,9 +71,12 @@ public class FuncionarioService {
 
         f.setNome(funcionario.getNome());
         f.setEmail(funcionario.getEmail());
+
+        // 🔐 ATUALIZAR SENHA APENAS SE FOR FORNECIDA (E CODIFICAR)
         if (funcionario.getSenha() != null && !funcionario.getSenha().isEmpty()) {
-            f.setSenha(funcionario.getSenha()); // sem codificação
+            f.setSenha(passwordEncoder.encode(funcionario.getSenha()));
         }
+
         f.setAtivo(funcionario.getAtivo());
 
         return this.funcionarioRepository.save(f);
@@ -86,9 +94,12 @@ public class FuncionarioService {
 
         f.setNome(funcionario.getNome());
         f.setEmail(funcionario.getEmail());
+
+        // 🔐 ATUALIZAR SENHA APENAS SE FOR FORNECIDA (E CODIFICAR)
         if (funcionario.getSenha() != null && !funcionario.getSenha().isEmpty()) {
-            f.setSenha(funcionario.getSenha()); // sem codificação
+            f.setSenha(passwordEncoder.encode(funcionario.getSenha()));
         }
+
         f.setAtivo(funcionario.getAtivo());
 
         return this.funcionarioRepository.save(f);
@@ -116,5 +127,20 @@ public class FuncionarioService {
         Funcionario funcionario = buscarPorUuid(uuid);
         funcionario.setAtivo(true);
         this.funcionarioRepository.save(funcionario);
+    }
+
+    // 🔐 MÉTODO ADICIONAL: Buscar por email (útil para autenticação)
+    public Funcionario buscarPorEmail(String email) {
+        return this.funcionarioRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Funcionário não encontrado"));
+    }
+
+    // 🔐 MÉTODO ADICIONAL: Verificar credenciais (para autenticação)
+    public boolean verificarCredenciais(String email, String senha) {
+        Optional<Funcionario> funcionarioOpt = funcionarioRepository.findByEmail(email);
+        if (funcionarioOpt.isPresent() && funcionarioOpt.get().getAtivo()) {
+            return passwordEncoder.matches(senha, funcionarioOpt.get().getSenha());
+        }
+        return false;
     }
 }

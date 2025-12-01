@@ -11,8 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -81,6 +83,11 @@ public class LivroService {
         l.setAnoPublicacao(livro.getAnoPublicacao());
         l.setDisponivel(livro.getDisponivel());
 
+        // 🔥 ATUALIZAR CATEGORIAS
+        if (livro.getCategorias() != null) {
+            atualizarCategoriasDoLivro(l, livro.getCategorias());
+        }
+
         return this.livroRepository.save(l);
     }
 
@@ -93,9 +100,30 @@ public class LivroService {
         l.setAnoPublicacao(livro.getAnoPublicacao());
         l.setDisponivel(livro.getDisponivel());
 
+        // 🔥 ATUALIZAR CATEGORIAS
+        if (livro.getCategorias() != null) {
+            atualizarCategoriasDoLivro(l, livro.getCategorias());
+        }
+
         return this.livroRepository.save(l);
     }
 
+    // 🔥 MÉTODO AUXILIAR PARA ATUALIZAR CATEGORIAS
+    private void atualizarCategoriasDoLivro(Livro livroExistente, Set<Categoria> novasCategorias) {
+        // Limpa as categorias atuais
+        livroExistente.getCategorias().clear();
+
+        // Busca e adiciona as novas categorias (garantindo que são entidades gerenciadas)
+        Set<Categoria> categoriasGerenciadas = new HashSet<>();
+        for (Categoria categoria : novasCategorias) {
+            Categoria categoriaGerenciada = categoriaService.buscarPorId(categoria.getId());
+            categoriasGerenciadas.add(categoriaGerenciada);
+        }
+
+        livroExistente.getCategorias().addAll(categoriasGerenciadas);
+    }
+
+    // ... outros métodos permanecem iguais
     public List<Livro> buscarPorTitulo(String titulo) {
         return this.livroRepository.findByTituloContainingIgnoreCase(titulo);
     }
